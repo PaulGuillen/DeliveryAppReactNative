@@ -18,6 +18,7 @@ import {
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import BaseScreen from '../../../components/containers/BaseScreen';
 import { LoginService } from '../service/LoginService';
+import FullScreenLoader from '../../../components/loading/FullScreenLoader';
 
 function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -31,16 +32,19 @@ function LoginScreen() {
       return;
     }
 
-    setLoading(true);
+    try {
+      setLoading(true);
+      const result = await LoginService.login(email, password);
 
-    const result = await LoginService.login(email, password);
-
-    setLoading(false);
-
-    if (result.success) {
-      console.log('LOGIN OK:', result.data);
-    } else {
-      Alert.alert('Error', result.error);
+      if (result.success) {
+        console.log('LOGIN OK:', result.data);
+      } else {
+        Alert.alert('Error', result.error);
+      }
+    } catch (e: any) {
+      Alert.alert('Error', e?.message ?? 'Ocurrió un error inesperado');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -54,10 +58,7 @@ function LoginScreen() {
         style={styles.background}
         resizeMode="cover"
       >
-        <TouchableWithoutFeedback
-          onPress={Keyboard.dismiss}
-          accessible={false}
-        >
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
           <KeyboardAvoidingView
             style={styles.flex}
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -98,12 +99,9 @@ function LoginScreen() {
                     autoCapitalize="none"
                     autoCorrect={false}
                     style={styles.input}
+                    editable={!loading}
                   />
-                  <Icon
-                    name="email-outline"
-                    size={20}
-                    color="#9E9E9E"
-                  />
+                  <Icon name="email-outline" size={20} color="#9E9E9E" />
                 </View>
 
                 {/* Password */}
@@ -117,32 +115,25 @@ function LoginScreen() {
                     autoCapitalize="none"
                     autoCorrect={false}
                     style={styles.input}
+                    editable={!loading}
                   />
 
                   <Pressable
                     onPress={() => setShowPassword(prev => !prev)}
                     hitSlop={10}
+                    disabled={loading}
                   >
                     <Icon
-                      name={
-                        showPassword
-                          ? 'eye-off-outline'
-                          : 'eye-outline'
-                      }
+                      name={showPassword ? 'eye-off-outline' : 'eye-outline'}
                       size={22}
-                      color={
-                        showPassword ? '#2B6EF2' : '#9E9E9E'
-                      }
+                      color={showPassword ? '#2B6EF2' : '#9E9E9E'}
                     />
                   </Pressable>
                 </View>
 
                 {/* Login button */}
                 <Pressable
-                  style={[
-                    styles.button,
-                    loading && styles.buttonDisabled,
-                  ]}
+                  style={[styles.button, loading && styles.buttonDisabled]}
                   onPress={handleLogin}
                   disabled={loading}
                 >
@@ -151,24 +142,20 @@ function LoginScreen() {
                   </Text>
                 </Pressable>
 
-                {/* Create account */}
                 <Pressable
                   style={styles.createAccount}
                   onPress={() => {}}
+                  disabled={loading}
                 >
-                  <Text style={styles.createText}>
-                    Crear una cuenta
-                  </Text>
-                  <Icon
-                    name="arrow-right-bold-box"
-                    size={28}
-                    color="#7AAAF2"
-                  />
+                  <Text style={styles.createText}>Crear una cuenta</Text>
+                  <Icon name="arrow-right-bold-box" size={28} color="#7AAAF2" />
                 </Pressable>
               </View>
             </ScrollView>
           </KeyboardAvoidingView>
         </TouchableWithoutFeedback>
+
+        <FullScreenLoader visible={loading} />
       </ImageBackground>
     </BaseScreen>
   );
