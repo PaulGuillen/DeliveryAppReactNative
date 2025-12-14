@@ -3,9 +3,11 @@ import { StyleSheet, Animated, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../../../navigation/AppNavigator';
+import BaseScreen from '../../../../components/containers/BaseScreen';
 
 const SplashScreen = () => {
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -23,11 +25,16 @@ const SplashScreen = () => {
   }, [fadeAnim, navigation]);
 
   return (
-    <View style={styles.container}>
-      <Animated.Text style={[styles.text, { opacity: fadeAnim }]}>
-        Bienvenido a FoodDeliveryApp 🚀
-      </Animated.Text>
-    </View>
+    <BaseScreen
+      barStyle="dark-content"
+      safeArea={{ top: false, bottom: false }}
+    >
+      <View style={styles.container}>
+        <Animated.Text style={[styles.text, { opacity: fadeAnim }]}>
+          Bienvenido a FoodDeliveryApp 🚀
+        </Animated.Text>
+      </View>
+    </BaseScreen>
   );
 };
 
